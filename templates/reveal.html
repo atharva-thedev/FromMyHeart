@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heart Surprise Revealed — HeartDrop</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <svg class="brand-icon" viewBox="0 0 24 24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      HeartDrop
+    </a>
+    <div class="nav-links">
+      <a href="/create" class="nav-link">Create</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="reveal-card" style="margin: auto; max-width: 520px;">
+      <div class="reveal-media-wrapper" style="height: 320px;">
+        <img class="reveal-image" src="{{ image_url }}" alt="Heart surprise photo">
+      </div>
+
+      <div class="reveal-message">
+        "{{ message }}"
+      </div>
+
+      {% if video_url %}
+      <div style="margin-bottom: 1.5rem;">
+        <video src="{{ video_url }}" controls style="width: 100%; border-radius: 10px;"></video>
+      </div>
+      {% endif %}
+
+      <div class="reveal-actions">
+        <a href="/h/{{ share_code }}" class="btn btn-primary">
+          Open in AR Mode
+        </a>
+        <a href="/create" class="btn btn-secondary">
+          Create a Heart
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeartDrop — Unlock Surprise</title>
+  <meta name="description" content="Hold both hands to your chest to awaken the heart.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- MediaPipe Computer Vision Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+
+<body style="background: #000; overflow: hidden;">
+
+  <div class="experience-viewport">
+    <!-- Mirrored Webcam Video Feed -->
+    <video id="camera-video" playsinline muted></video>
+
+    <!-- AR Canvas Overlay for Heart and Particles -->
+    <canvas id="ar-canvas"></canvas>
+
+    <!-- Accessible tap zone directly over heart -->
+    <div id="direct-tap-trigger" class="direct-tap-indicator" title="Tap to open"></div>
+
+    <!-- Header Overlay -->
+    <header class="experience-overlay-header">
+      <a href="/" class="brand" style="font-size: 1.25rem;">
+        <svg class="brand-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+        HeartDrop
+      </a>
+
+      <button id="audio-toggle" class="audio-toggle-btn" title="Toggle Heartbeat Sound">
+        <svg id="audio-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Guidance HUD Overlay -->
+    <div class="guidance-box" id="guidance-box">
+      <span class="guidance-dot"></span>
+      <span id="guidance-text">Starting experience...</span>
+    </div>
+
+    <!-- Loading & Permission Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <p id="loading-status"
+        style="font-size: 1.05rem; max-width: 440px; color: var(--text-secondary); line-height: 1.6;">
+        Connecting to camera feed...
+      </p>
+    </div>
+
+    <!-- Camera Mode Switcher Controls -->
+    <div class="controls-overlay" id="controls-overlay">
+      <!-- Main Mode Switcher: [ Normal ] [ X-Ray Scan ] -->
+      <div class="mode-toggle-group">
+        <button class="mode-btn active" id="btn-mode-normal">Normal</button>
+        <button class="mode-btn" id="btn-mode-anatomy">X-Ray Scan</button>
+      </div>
+
+      <!-- Privacy Assurance -->
+      <span class="privacy-note">Camera processing happens locally on your device.</span>
+    </div>
+
+    <!-- Reveal Modal: Emerging photo and personal message -->
+    <div class="reveal-modal" id="reveal-modal">
+      <div class="reveal-card">
+        <div class="reveal-media-wrapper">
+          <img id="reveal-image" class="reveal-image" src="" alt="Revealed heart memory">
+        </div>
+
+        <div class="reveal-message" id="reveal-message"></div>
+
+        <div class="reveal-actions">
+          <button class="btn btn-primary" id="btn-play-video" style="display: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Play Video
+          </button>
+          <button class="btn btn-secondary" id="btn-replay">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+            </svg>
+            Replay
+          </button>
+          <a href="/create" class="btn btn-secondary">
+            Send a Heart
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Modal Player -->
+    <div class="video-modal" id="video-modal">
+      <div class="video-wrapper">
+        <button class="close-video-btn" id="btn-close-video" title="Close video">&times;</button>
+        <video id="video-player" controls playsinline></video>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.HEARTDROP_SHARE_CODE = "{{ share_code }}";
+  </script>
+  <!-- Modular Experience & Anatomy Scripts -->
+  <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/anatomy.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/heart.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/experience.js') }}"></script>
+</body>
+
+</html>

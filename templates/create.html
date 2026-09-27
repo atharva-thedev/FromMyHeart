@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create a Heart — HeartDrop</title>
+  <meta name="description" content="Prepare a heartfelt digital surprise with an image, video, and personal message.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <svg class="brand-icon" viewBox="0 0 24 24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      HeartDrop
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+      <div class="flash-message">
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="container">
+    <div class="card">
+      <h2 class="card-title">Seal a Surprise</h2>
+      <p class="card-subtitle">Encapsulate a memory inside a beating virtual heart.</p>
+
+      <form id="create-form" action="/create" method="POST" enctype="multipart/form-data">
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label class="form-label" for="image-input">
+            Heart's Photo <span style="color: var(--heart-rose)">*</span>
+          </label>
+          <div class="file-dropzone" id="image-dropzone">
+            <input type="file" id="image-input" name="image" accept=".jpg,.jpeg,.png,.webp" required>
+            <svg class="dropzone-icon" viewBox="0 0 24 24">
+              <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <div class="dropzone-text" id="image-dropzone-label">Click or drop a photo here</div>
+            <div class="dropzone-hint">JPG, PNG, or WEBP (Max 10 MB)</div>
+          </div>
+          <div class="preview-container" id="image-preview-container">
+            <img id="image-preview" alt="Selected photo preview">
+            <span class="preview-badge" id="image-size-badge"></span>
+          </div>
+        </div>
+
+        <!-- Optional Video Upload -->
+        <div class="form-group">
+          <label class="form-label" for="video-input">
+            Optional Video <span class="optional">(Optional)</span>
+          </label>
+          <div class="file-dropzone" id="video-dropzone">
+            <input type="file" id="video-input" name="video" accept=".mp4,.webm">
+            <svg class="dropzone-icon" viewBox="0 0 24 24">
+              <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <div class="dropzone-text" id="video-dropzone-label">Attach a short video recording</div>
+            <div class="dropzone-hint">MP4 or WEBM (Max 50 MB)</div>
+          </div>
+          <div class="preview-container" id="video-preview-container">
+            <video id="video-preview" controls muted></video>
+            <span class="preview-badge" id="video-size-badge"></span>
+          </div>
+        </div>
+
+        <!-- Personal Message -->
+        <div class="form-group">
+          <label class="form-label" for="message">
+            Personal Message <span style="color: var(--heart-rose)">*</span>
+          </label>
+          <textarea 
+            id="message" 
+            name="message" 
+            class="form-control" 
+            maxlength="1000" 
+            placeholder="Write words that belong only to the two of you..." 
+            required></textarea>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.35rem; font-size: 0.75rem; color: var(--text-muted)">
+            <span id="char-counter">0 / 1000</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="btn-submit">
+          Generate Secret Heart Link
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // Live preview and size verification
+    const imageInput = document.getElementById('image-input');
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const imageSizeBadge = document.getElementById('image-size-badge');
+    const imageLabel = document.getElementById('image-dropzone-label');
+
+    const videoInput = document.getElementById('video-input');
+    const videoPreviewContainer = document.getElementById('video-preview-container');
+    const videoPreview = document.getElementById('video-preview');
+    const videoSizeBadge = document.getElementById('video-size-badge');
+    const videoLabel = document.getElementById('video-dropzone-label');
+
+    const messageTextarea = document.getElementById('message');
+    const charCounter = document.getElementById('char-counter');
+
+    messageTextarea.addEventListener('input', () => {
+      charCounter.textContent = `${messageTextarea.value.length} / 1000`;
+    });
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (!file) return;
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Image exceeds 10MB limit. Please select a smaller file.");
+        imageInput.value = '';
+        imagePreviewContainer.style.display = 'none';
+        return;
+      }
+
+      imageLabel.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreviewContainer.style.display = 'block';
+        imageSizeBadge.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    videoInput.addEventListener('change', () => {
+      const file = videoInput.files[0];
+      if (!file) return;
+
+      if (file.size > 50 * 1024 * 1024) {
+        alert("Video exceeds 50MB limit. Please select a smaller file.");
+        videoInput.value = '';
+        videoPreviewContainer.style.display = 'none';
+        return;
+      }
+
+      videoLabel.textContent = file.name;
+      const url = URL.createObjectURL(file);
+      videoPreview.src = url;
+      videoPreviewContainer.style.display = 'block';
+      videoSizeBadge.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+    });
+
+    // Form submission feedback
+    const form = document.getElementById('create-form');
+    const submitBtn = document.getElementById('btn-submit');
+    form.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enclosing into Heart...';
+      submitBtn.style.opacity = '0.75';
+    });
+  </script>
+</body>
+</html>
